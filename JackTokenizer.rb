@@ -8,7 +8,7 @@ class JackTokenizer
                FALSE: 'false', NULL: 'null', THIS: 'this'}
 
   def initialize(path) #Constructor. Opens the input file/stream and gets ready to tokenize it.
-
+    @all_files = Dir.entries(path).select{|f| f.end_with? '.jack'}
   end
 
   def has_more_tokens #Do we have more tokens in the input?
@@ -45,4 +45,4 @@ class JackTokenizer
 
 end
 
-test = JackTokenizer.new('bla')
+test = JackTokenizer.new('C:\Users\reuvenp\Downloads\compilers\PofPLmaterial-5775\Exercises\Targil4\project 10\ExpressionlessSquare')
