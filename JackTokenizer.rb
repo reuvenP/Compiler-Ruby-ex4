@@ -9,6 +9,18 @@ class JackTokenizer
 
   def initialize(path) #Constructor. Opens the input file/stream and gets ready to tokenize it.
     @all_files = Dir.entries(path).select{|f| f.end_with? '.jack'}
+    for file in @all_files
+      tokenize_file(path + "\\" + file)
+    end
+  end
+
+  def tokenize_file(path)
+    stream = File.read(path)
+    stream = stream.gsub(/\/\/[^\n]*\n/, '') #remove single-line comment
+    stream = stream.gsub(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)/, '') #remove multi-line comment
+    stream = stream.gsub(/[\n\r\t]+/, ' ') #remove new lines and tabs
+    stream = stream.gsub(/\s+/, ' ') #all spaces to single space
+    puts(stream)
   end
 
   def has_more_tokens #Do we have more tokens in the input?
