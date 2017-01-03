@@ -188,4 +188,4 @@ class JackTokenizer
 
 end
 
-JackTokenizer.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled\ArrayTest')
+#JackTokenizer.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled\ArrayTest')
