@@ -6,9 +6,10 @@ class JackTokenizer
                BOOLEAN: 'boolean', CHAR: 'char', VOID: 'void', VAR: 'var', STATIC: 'static', FIELD: 'field',
                LET: 'let', DO: 'do', IF: 'if', ELSE: 'else', WHILE: 'while', RETURN: 'return', TRUE: 'true',
                FALSE: 'false', NULL: 'null', THIS: 'this'}
-  @symbols = %w|{ } ( ) [ ] . , ; + - * / & \| < > = - |
+
 
   def initialize(path) #Constructor. Opens the input file/stream and gets ready to tokenize it.
+    @symbols = %w|{ } ( ) [ ] . , ; + - * / & \| < > = - |
     @all_files = Dir.entries(path).select{|f| f.end_with? '.jack'}
     for file in @all_files
       tokenize_file(path + "\\" + file)
@@ -16,31 +17,53 @@ class JackTokenizer
   end
 
   def tokenize_file(path)
-    tokens = []
+    tokens = Hash.new
     token = ''
     state = 0
+    tokens_counter = 0
     stream = File.read(path)
     stream = stream.gsub(/\/\/[^\n]*\n/, '') #remove single-line comment
     stream = stream.gsub(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)/, '') #remove multi-line comment
     stream = stream.gsub(/[\n\r\t]+/, ' ') #remove new lines and tabs
     stream = stream.gsub(/\s+/, ' ') #all spaces to single space
     stream.each_char do |c|
-      puts(c)
+      puts(tokens)
       case state
         when 0
           if c =~ /[0-9]/
             state = 3
-            token << c
-          end
-          if c == "\""
+            token = c
+          elsif c == "\""
             state = 5
+            token = ''
+          elsif @symbols.include? c
+            state = 0
+            tokens[[tokens_counter, 0]] = 'symbol'
+            tokens[[tokens_counter, 1]] = c
+            tokens_counter += 1
+          elsif c == '_'
+            state = 2
+            token = c
+          elsif c =~ /[A-Za-z]/
+            state = 12
+            token = c
+          else
+            state = 0
           end
-          if @symbols.include? c
-            tokens.push({Type: @token_types[:SYMBOL], Value: c})
+        when 3
+          if c =~ /[0-9]/
+            state = 3
+            token << c
+          else
+            state = 0
+            tokens[[tokens_counter, 0]] = 'integerConstant'
+            tokens[[tokens_counter, 1]] = token
+            tokens_counter += 1
+            token = ''
           end
       end
     end
-    puts(stream)
+    #puts(stream)
   end
 
   def has_more_tokens #Do we have more tokens in the input?
