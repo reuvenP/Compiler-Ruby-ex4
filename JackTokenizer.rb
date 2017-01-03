@@ -131,7 +131,24 @@ class JackTokenizer
     xml = "<tokens>\n"
     i = 0
     while i < len do
-      xml << '<' << tokens[[i, 0]] << '> ' << tokens[[i, 1]] << ' </' << tokens[[i, 0]] << ">\n"
+      xml << '<' << tokens[[i, 0]] << '> '
+      if tokens[[i, 0]] == 'symbol'
+        case tokens[[i, 1]]
+          when '<'
+            xml << '&lt;'
+          when '>'
+            xml << '&gt;'
+          when '&'
+            xml << '&amp;'
+          when "\""
+            xml << '&quot;'
+          else
+            xml << tokens[[i, 1]]
+        end
+      else
+        xml << tokens[[i, 1]]
+      end
+      xml << ' </' << tokens[[i, 0]] << ">\n"
       i += 1
     end
     xml << '</tokens>'
