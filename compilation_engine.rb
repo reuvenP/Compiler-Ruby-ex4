@@ -1,4 +1,5 @@
 require './JackTokenizer'
+require 'rexml/document'
 
 class CompilationEngine
 
@@ -12,7 +13,11 @@ class CompilationEngine
   end
 
   def compile_class(tokens) #Compiles a complete class.
-
+    doc = REXML::Document.new(tokens)
+    root = doc.root
+    root.elements.each {|token|
+      puts token.name << ': ' << token.text[1..-2]
+    }
   end
 
 end
