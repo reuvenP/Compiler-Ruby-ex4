@@ -12,7 +12,13 @@ class JackTokenizer
                  FALSE: 'false', NULL: 'null', THIS: 'this'}
     @all_files = Dir.entries(path).select{|f| f.end_with? '.jack'}
     for file in @all_files
-      tokenize_file(path + "\\" + file)
+      xml_stream = tokenize_file(path + "\\" + file)
+      xml_file = file[0..-6]
+      xml_file << 'T.xml'
+      xml_full_path = path + "\\" + xml_file
+      File.open(xml_full_path, 'w') do |f|
+        f.puts(xml_stream)
+      end
     end
   end
 
@@ -91,7 +97,7 @@ class JackTokenizer
             token << c
           else
             state = 0
-            if @keywords.values.include? c
+            if @keywords.values.include? token
               tokens[[tokens_counter, 0]] = 'keyword'
             else
               tokens[[tokens_counter, 0]] = 'identifier'
@@ -103,7 +109,17 @@ class JackTokenizer
         else
       end
     end
-    #puts(stream)
+    tokens_to_xml(tokens, tokens_counter)
+  end
+
+  def tokens_to_xml(tokens, len)
+    xml = "<tokens>\n"
+    i = 0
+    while i < len do
+      xml << '<' << tokens[[i, 0]] << '> ' << tokens[[i, 1]] << ' </' << tokens[[i, 0]] << ">\n"
+      i += 1
+    end
+    xml << '</tokens>'
   end
 
   def has_more_tokens #Do we have more tokens in the input?
@@ -140,4 +156,4 @@ class JackTokenizer
 
 end
 
-test = JackTokenizer.new('C:\Users\reuvenp\Downloads\compilers\PofPLmaterial-5775\Exercises\Targil4\project 10\ExpressionlessSquare')
+test = JackTokenizer.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled')
