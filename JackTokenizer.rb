@@ -6,6 +6,7 @@ class JackTokenizer
                BOOLEAN: 'boolean', CHAR: 'char', VOID: 'void', VAR: 'var', STATIC: 'static', FIELD: 'field',
                LET: 'let', DO: 'do', IF: 'if', ELSE: 'else', WHILE: 'while', RETURN: 'return', TRUE: 'true',
                FALSE: 'false', NULL: 'null', THIS: 'this'}
+  @symbols = %w|{ } ( ) [ ] . , ; + - * / & \| < > = - |
 
   def initialize(path) #Constructor. Opens the input file/stream and gets ready to tokenize it.
     @all_files = Dir.entries(path).select{|f| f.end_with? '.jack'}
@@ -15,11 +16,30 @@ class JackTokenizer
   end
 
   def tokenize_file(path)
+    tokens = []
+    token = ''
+    state = 0
     stream = File.read(path)
     stream = stream.gsub(/\/\/[^\n]*\n/, '') #remove single-line comment
     stream = stream.gsub(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)/, '') #remove multi-line comment
     stream = stream.gsub(/[\n\r\t]+/, ' ') #remove new lines and tabs
     stream = stream.gsub(/\s+/, ' ') #all spaces to single space
+    stream.each_char do |c|
+      puts(c)
+      case state
+        when 0
+          if c =~ /[0-9]/
+            state = 3
+            token << c
+          end
+          if c == "\""
+            state = 5
+          end
+          if @symbols.include? c
+            tokens.push({Type: @token_types[:SYMBOL], Value: c})
+          end
+      end
+    end
     puts(stream)
   end
 
