@@ -2,14 +2,14 @@
 class JackTokenizer
 
   @token_types = {KEYWORD: 'keyword', SYMBOL: 'symbol', IDENTIFIER: 'identifier', INT_CONST: 'integerConstant', STRING_CONST: 'stringConstant'}
-  @keywords = {CLASS: 'class', METHOD: 'method', FUNCTION: 'function', CONSTRUCTOR: 'constructor',  INT: 'int',
-               BOOLEAN: 'boolean', CHAR: 'char', VOID: 'void', VAR: 'var', STATIC: 'static', FIELD: 'field',
-               LET: 'let', DO: 'do', IF: 'if', ELSE: 'else', WHILE: 'while', RETURN: 'return', TRUE: 'true',
-               FALSE: 'false', NULL: 'null', THIS: 'this'}
 
 
   def initialize(path) #Constructor. Opens the input file/stream and gets ready to tokenize it.
     @symbols = %w|{ } ( ) [ ] . , ; + - * / & \| < > = - |
+    @keywords = {CLASS: 'class', METHOD: 'method', FUNCTION: 'function', CONSTRUCTOR: 'constructor',  INT: 'int',
+                 BOOLEAN: 'boolean', CHAR: 'char', VOID: 'void', VAR: 'var', STATIC: 'static', FIELD: 'field',
+                 LET: 'let', DO: 'do', IF: 'if', ELSE: 'else', WHILE: 'while', RETURN: 'return', TRUE: 'true',
+                 FALSE: 'false', NULL: 'null', THIS: 'this'}
     @all_files = Dir.entries(path).select{|f| f.end_with? '.jack'}
     for file in @all_files
       tokenize_file(path + "\\" + file)
@@ -27,7 +27,6 @@ class JackTokenizer
     stream = stream.gsub(/[\n\r\t]+/, ' ') #remove new lines and tabs
     stream = stream.gsub(/\s+/, ' ') #all spaces to single space
     stream.each_char do |c|
-      puts(tokens)
       case state
         when 0
           if c =~ /[0-9]/
@@ -83,6 +82,25 @@ class JackTokenizer
             tokens_counter += 1
             token = ''
           end
+        when 12
+          if c =~ /[0-9_]/
+            state = 2
+            token << c
+          elsif c =~ /[a-zA-Z]/
+            state = 12
+            token << c
+          else
+            state = 0
+            if @keywords.values.include? c
+              tokens[[tokens_counter, 0]] = 'keyword'
+            else
+              tokens[[tokens_counter, 0]] = 'identifier'
+            end
+            tokens[[tokens_counter, 1]] = token
+            tokens_counter += 1
+            token = ''
+          end
+        else
       end
     end
     #puts(stream)
