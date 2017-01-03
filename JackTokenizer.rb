@@ -11,7 +11,7 @@ class JackTokenizer
                  LET: 'let', DO: 'do', IF: 'if', ELSE: 'else', WHILE: 'while', RETURN: 'return', TRUE: 'true',
                  FALSE: 'false', NULL: 'null', THIS: 'this'}
     @all_files = Dir.entries(path).select{|f| f.end_with? '.jack'}
-    for file in @all_files
+    @all_files.each { |file|
       xml_stream = tokenize_file(path + "\\" + file)
       xml_file = file[0..-6]
       xml_file << 'T.xml'
@@ -19,7 +19,7 @@ class JackTokenizer
       File.open(xml_full_path, 'w') do |f|
         f.puts(xml_stream)
       end
-    end
+    }
   end
 
   def tokenize_file(path)
@@ -156,4 +156,6 @@ class JackTokenizer
 
 end
 
-test = JackTokenizer.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled')
+JackTokenizer.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled')
+#TODO: fix bug in symbols
+#TODO: xml spacial tags
