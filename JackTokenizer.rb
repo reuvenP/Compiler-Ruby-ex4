@@ -188,5 +188,4 @@ class JackTokenizer
 
 end
 
-JackTokenizer.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled')
-#TODO: xml spacial tags
+JackTokenizer.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled\ArrayTest')
