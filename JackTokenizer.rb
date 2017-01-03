@@ -61,6 +61,28 @@ class JackTokenizer
             tokens_counter += 1
             token = ''
           end
+        when 5
+          if c == "\""
+            state = 0
+            tokens[[tokens_counter, 0]] = 'stringConstant'
+            tokens[[tokens_counter, 1]] = token
+            tokens_counter += 1
+            token = ''
+          else
+            state = 5
+            token << c
+          end
+        when 2
+          if c =~ /[a-zA-Z0-9_]/
+            state = 2
+            token << c
+          else
+            state = 0
+            tokens[[tokens_counter, 0]] = 'identifier'
+            tokens[[tokens_counter, 1]] = token
+            tokens_counter += 1
+            token = ''
+          end
       end
     end
     #puts(stream)
