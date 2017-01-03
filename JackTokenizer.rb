@@ -65,6 +65,11 @@ class JackTokenizer
             tokens[[tokens_counter, 1]] = token
             tokens_counter += 1
             token = ''
+            if @symbols.include? c
+              tokens[[tokens_counter, 0]] = 'symbol'
+              tokens[[tokens_counter, 1]] = c
+              tokens_counter += 1
+            end
           end
         when 5
           if c == "\""
@@ -87,6 +92,11 @@ class JackTokenizer
             tokens[[tokens_counter, 1]] = token
             tokens_counter += 1
             token = ''
+            if @symbols.include? c
+              tokens[[tokens_counter, 0]] = 'symbol'
+              tokens[[tokens_counter, 1]] = c
+              tokens_counter += 1
+            end
           end
         when 12
           if c =~ /[0-9_]/
@@ -105,6 +115,11 @@ class JackTokenizer
             tokens[[tokens_counter, 1]] = token
             tokens_counter += 1
             token = ''
+            if @symbols.include? c
+              tokens[[tokens_counter, 0]] = 'symbol'
+              tokens[[tokens_counter, 1]] = c
+              tokens_counter += 1
+            end
           end
         else
       end
@@ -157,5 +172,4 @@ class JackTokenizer
 end
 
 JackTokenizer.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled')
-#TODO: fix bug in symbols
 #TODO: xml spacial tags
