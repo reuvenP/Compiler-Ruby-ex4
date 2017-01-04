@@ -19,6 +19,22 @@ class CompilationEngine
     }
   end
 
+  def next_token
+    if @tokens_array.empty?
+      nil
+    else
+      @tokens_array[0]
+    end
+  end
+
+  def get_next_token
+    if next_token == nil
+      nil
+    else
+      @tokens_array.shift
+    end
+  end
+
   def compile_class #Compiles a complete class.
 
   end
