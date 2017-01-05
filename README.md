@@ -1,2 +1,2 @@
 # Compiler-Ruby-ex4
-run "compilation_engine.rb <directory_path>"
+run "compilation_engine.rb \<directory_path\>"
