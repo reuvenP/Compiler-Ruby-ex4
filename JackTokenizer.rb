@@ -30,8 +30,6 @@ class JackTokenizer
     stream = File.read(path)
     stream = stream.gsub(/\/\/[^\n]*\n/, '') #remove single-line comment
     stream = stream.gsub(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)/, '') #remove multi-line comment
-    #stream = stream.gsub(/[\n\r\t]+/, ' ') #remove new lines and tabs
-    #stream = stream.gsub(/\s+/, ' ') #all spaces to single space
     stream.each_char do |c|
       case state
         when 0
@@ -152,40 +150,5 @@ class JackTokenizer
       i += 1
     end
     xml << '</tokens>'
+    
   end
-
-  def has_more_tokens #Do we have more tokens in the input?
-
-  end
-
-  def advance #Gets the next token from the input and makes it the current token. This method should only be called if hasMoreTokens() is true. Initially there is no current token.
-
-  end
-
-  def token_type #Returns the type of the current token.
-
-  end
-
-  def keyword #Returns the keyword which is the current token. Should be called only when tokenType() is KEYWORD.
-
-  end
-
-  def symbol #Returns the character which is the current token. Should be called only when tokenType() is SYMBOL.
-
-  end
-
-  def identifier #Returns the identifier which is the current token. Should be called only when tokenType() is IDENTIFIER
-
-  end
-
-  def int_val #Returns the integer value of the current token. Should be called only when tokenType() is INT_CONST
-
-  end
-
-  def string_val #Returns the string value of the current token, without the double quotes. Should be called only when tokenType() is STRING_CONST
-
-  end
-
-end
-
-#JackTokenizer.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled\ArrayTest')
