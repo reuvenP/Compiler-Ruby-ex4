@@ -45,9 +45,10 @@ class CompilationEngine
       str = str.gsub(/<stringConstant>\n\s*/, '<stringConstant> ')
       str = str.gsub(/\n\s*<\/stringConstant>/, '</stringConstant>')
       str = str.gsub(/\r\s*<\/stringConstant>/, '</stringConstant>')
-
       #prettify parameterList
       str = str.gsub('<parameterList/>', "<parameterList>\n</parameterList>")
+      #prettify expressionList
+      str = str.gsub('<expressionList/>', "<expressionList>\n</expressionList>")
       puts str
       out_file = path + "\\" + file[0..-6] + '.xml'
       File.open(out_file, 'w') do |f|
@@ -280,7 +281,7 @@ class CompilationEngine
         base.add(get_next_token_element) #'('
         base.add(compile_expression_list) #expressionList
         base.add(get_next_token_element) #')'
-      else #next_token[1] == '.'
+      elsif next_token[1] == '.'
         base.add(get_next_token_element) #'.'
         base.add(get_next_token_element) #subroutineName
         base.add(get_next_token_element) #'('
