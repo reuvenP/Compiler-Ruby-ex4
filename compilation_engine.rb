@@ -6,6 +6,8 @@ class CompilationEngine
   def initialize(path)
     JackTokenizer.new(path)
     @all_files = Dir.entries(path).select{|f| f.end_with? 'T.xml'}
+    @string_counter = 0
+    @string_array = Array.new
     @all_files.each {|file|
       @tokens_array = []
       @parse_tree = []
@@ -14,6 +16,11 @@ class CompilationEngine
       root = doc.root
       root.elements.each {|token|
         elem = [token.name, token.text[1..-2]]
+        if elem[0] == 'stringConstant'
+          @string_array.push(elem[1])
+          elem[1] = @string_counter
+          @string_counter += 1
+        end
         @tokens_array.push(elem)
       }
       tree = compile_class
@@ -43,8 +50,8 @@ class CompilationEngine
       #prettify stringConstant
       str = str.gsub(/<stringConstant>\r\s*/, '<stringConstant> ')
       str = str.gsub(/<stringConstant>\n\s*/, '<stringConstant> ')
-      str = str.gsub(/&apos;\n\s*<\/stringConstant>/, '</stringConstant>')
-      str = str.gsub(/&apos;\r\s*<\/stringConstant>/, '</stringConstant>')
+      str = str.gsub(/\n\s*<\/stringConstant>/, '</stringConstant>')
+      str = str.gsub(/\r\s*<\/stringConstant>/, '</stringConstant>')
       #prettify parameterList
       str = str.gsub('<parameterList/>', "<parameterList>\n</parameterList>")
       #prettify expressionList
@@ -59,6 +66,12 @@ class CompilationEngine
         if arr[i].include? '</expressionList>' and arr[i-1].include? '<expressionList>'
           leading_spaces = arr[i-1].count(' ')
           arr[i] = ' ' * leading_spaces + arr[i]
+        end
+        if arr[i].include? 'stringConstant'
+          start_offset = arr[i].index('>') + 2
+          end_offset = arr[i].index('</') - 2
+          index = arr[i][start_offset..end_offset]
+          arr[i] = arr[i].gsub(/[0-9]+/, @string_array[index.to_i])
         end
         i += 1
       end
@@ -88,10 +101,7 @@ class CompilationEngine
   def get_next_token_element
     cur = get_next_token
     elem = REXML::Element.new(cur[0])
-    elem.text = ' ' << cur[1] << ' '
-    if cur[0] == 'stringConstant'
-      elem.text = elem.text << "'"
-    end
+    elem.text = ' ' << cur[1].to_s << ' '
     elem
   end
 
@@ -315,10 +325,6 @@ class CompilationEngine
       end
     end
     base
-  end
-
-  def prettify
-
   end
 
 end
