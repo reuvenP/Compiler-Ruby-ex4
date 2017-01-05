@@ -43,8 +43,8 @@ class CompilationEngine
       #prettify stringConstant
       str = str.gsub(/<stringConstant>\r\s*/, '<stringConstant> ')
       str = str.gsub(/<stringConstant>\n\s*/, '<stringConstant> ')
-      str = str.gsub(/\n\s*<\/stringConstant>/, '</stringConstant>')
-      str = str.gsub(/\r\s*<\/stringConstant>/, '</stringConstant>')
+      str = str.gsub(/&apos;\n\s*<\/stringConstant>/, '</stringConstant>')
+      str = str.gsub(/&apos;\r\s*<\/stringConstant>/, '</stringConstant>')
       #prettify parameterList
       str = str.gsub('<parameterList/>', "<parameterList>\n</parameterList>")
       #prettify expressionList
@@ -89,6 +89,9 @@ class CompilationEngine
     cur = get_next_token
     elem = REXML::Element.new(cur[0])
     elem.text = ' ' << cur[1] << ' '
+    if cur[0] == 'stringConstant'
+      elem.text = elem.text << "'"
+    end
     elem
   end
 
@@ -320,4 +323,4 @@ class CompilationEngine
 
 end
 
-CompilationEngine.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled\ArrayTest')
+CompilationEngine.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled\ExpressionlessSquare')

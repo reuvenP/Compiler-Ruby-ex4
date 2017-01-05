@@ -30,8 +30,8 @@ class JackTokenizer
     stream = File.read(path)
     stream = stream.gsub(/\/\/[^\n]*\n/, '') #remove single-line comment
     stream = stream.gsub(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)/, '') #remove multi-line comment
-    stream = stream.gsub(/[\n\r\t]+/, ' ') #remove new lines and tabs
-    stream = stream.gsub(/\s+/, ' ') #all spaces to single space
+    #stream = stream.gsub(/[\n\r\t]+/, ' ') #remove new lines and tabs
+    #stream = stream.gsub(/\s+/, ' ') #all spaces to single space
     stream.each_char do |c|
       case state
         when 0
