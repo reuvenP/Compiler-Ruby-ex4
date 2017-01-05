@@ -152,3 +152,4 @@ class JackTokenizer
     xml << '</tokens>'
     
   end
+end
