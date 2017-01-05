@@ -323,4 +323,4 @@ class CompilationEngine
 
 end
 
-CompilationEngine.new('C:\Users\reuvenp\Downloads\compilers\ex4\compiled\ExpressionlessSquare')
+CompilationEngine.new(ARGV[0])
