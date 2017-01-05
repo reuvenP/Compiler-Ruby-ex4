@@ -21,8 +21,8 @@ class CompilationEngine
       File.open(out_file, 'w') do |f|
         f.puts(tree)
       end
-      puts tree
-      #tree.write($stdout, 1)
+      #puts tree
+      tree.write($stdout, 2)
     }
   end
 
@@ -130,41 +130,145 @@ class CompilationEngine
   def compile_statements #Compiles a sequence of statements, not including the enclosing “{}”.
     base = REXML::Element.new('statements')
     while next_token[1] == 'let' or next_token[1] == 'if' or next_token[1] == 'while' or next_token[1] == 'do' or next_token[1] == 'return'
-
+      case next_token[1]
+        when 'let'
+          base.add(compile_let)
+        when 'if'
+          base.add(compile_if)
+        when 'while'
+          base.add(compile_while)
+        when 'do'
+          base.add(compile_do)
+        when 'return'
+          base.add(compile_return)
+        else
+      end
     end
     base
   end
 
   def compile_do #Compiles a do statement.
-
+    base = REXML::Element.new('doStatement')
+    base.add(get_next_token_element) #'do'
+    base.add(get_next_token_element) #subroutineName | ( className | varName)
+    if next_token[1] == '.'
+      base.add(get_next_token_element) #'.'
+      base.add(get_next_token_element) #'subroutineName'
+    end
+    base.add(get_next_token_element) #'('
+    base.add(compile_expression_list) #expressionList
+    base.add(get_next_token_element) #')'
+    base.add(get_next_token_element) #';'
+    base
   end
 
   def compile_let #Compiles a let statement.
-
+    base = REXML::Element.new('letStatement')
+    base.add(get_next_token_element) #'let'
+    base.add(get_next_token_element) #varName
+    if next_token[1] == '['
+      base.add(get_next_token_element) #'['
+      base.add(compile_expression) #expression
+      base.add(get_next_token_element) #']'
+    end
+    base.add(get_next_token_element) #'='
+    base.add(compile_expression) #expression
+    base.add(get_next_token_element) #';'
+    base
   end
 
   def compile_while #Compiles a while statement.
-
+    base = REXML::Element.new('whileStatement')
+    base.add(get_next_token_element) #'while'
+    base.add(get_next_token_element) #'('
+    base.add(compile_expression) #expression
+    base.add(get_next_token_element) #')'
+    base.add(get_next_token_element) #'{'
+    base.add(compile_statements) #statements
+    base.add(get_next_token_element) #'}'
+    base
   end
 
   def compile_return #Compiles a return statement.
-
+    base = REXML::Element.new('returnStatement')
+    base.add(get_next_token_element) #'return'
+    if next_token[1] != ';'
+      base.add(compile_expression) #expression?
+    end
+    base.add(get_next_token_element) #';'
+    base
   end
 
   def compile_if #Compiles an if statement, possibly with a trailing else clause.
-
+    base = REXML::Element.new('ifStatement')
+    base.add(get_next_token_element) #'if'
+    base.add(get_next_token_element) #'('
+    base.add(compile_expression) #expression
+    base.add(get_next_token_element) #')'
+    base.add(get_next_token_element) #'{'
+    base.add(compile_statements) #statements
+    base.add(get_next_token_element) #'}'
+    if next_token[1] == 'else'
+      base.add(get_next_token_element) #'else'
+      base.add(get_next_token_element) #'{'
+      base.add(compile_statements) #statements
+      base.add(get_next_token_element) #'}'
+    end
+    base
   end
 
   def compile_expression #Compiles an expression.
-
+    base = REXML::Element.new('expression')
+    base.add(compile_term) #term
+    while next_token[1] == '+' or next_token[1] == '-' or next_token[1] == '*' or next_token[1] == '/' or next_token[1] == '&' or next_token[1] == '|' or next_token[1] == '<' or next_token[1] == '>' or next_token[1] == '='
+      base.add(get_next_token_element) #op
+      base.add(compile_term) #term
+    end
+    base
   end
 
   def compile_term #Compiles a term. This routine is faced with a slight difficulty when trying to decide between some of the alternative parsing rules. Specifically, if the current token is an identifier, the routine must distinguish between a variable, an array entry, and a subroutine call. A single look-ahead token, which may be one of “[“, “(“, or “.” suffices to distinguish between the three possibilities. Any other token is not part of this term and should not be advanced over.
-
+    base = REXML::Element.new('term')
+    if next_token[0] == 'integerConstant' or next_token[0] == 'stringConstant' or next_token[1] == 'true' or next_token[1] == 'false' or next_token[1] == 'null' or next_token[1] == 'this'
+      base.add(get_next_token_element) #integerConstant | stringConstant | keywordConstant
+    elsif next_token[1] == '-' or next_token[1] == '~'
+      base.add(get_next_token_element) #unaryOp
+      base.add(compile_term) #term
+    elsif next_token[1] == '('
+      base.add(get_next_token_element) #'('
+      base.add(compile_expression) #expression
+      base.add(get_next_token_element) #')'
+    else
+      base.add(get_next_token_element) #for lookahead 2 - need to pop the first lookahead
+      if next_token[1] == '['
+        base.add(get_next_token_element) #'['
+        base.add(compile_expression) #expression
+        base.add(get_next_token_element) #']'
+      elsif next_token[1] == '('
+        base.add(get_next_token_element) #'('
+        base.add(compile_expression_list) #expressionList
+        base.add(get_next_token_element) #')'
+      else #next_token[1] == '.'
+        base.add(get_next_token_element) #'.'
+        base.add(get_next_token_element) #subroutineName
+        base.add(get_next_token_element) #'('
+        base.add(compile_expression_list) #expressionList
+        base.add(get_next_token_element) #')'
+      end
+    end
+    base
   end
 
   def compile_expression_list #Compiles a (possibly empty) comma-separated list of expressions.
-
+    base = REXML::Element.new('expressionList')
+    if next_token[1] != ')'
+      base.add(compile_expression) #expression
+      while next_token[1] == ','
+        base.add(get_next_token_element) #','
+        base.add(compile_expression) #expression
+      end
+    end
+    base
   end
 
 end
