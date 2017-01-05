@@ -17,12 +17,44 @@ class CompilationEngine
         @tokens_array.push(elem)
       }
       tree = compile_class
+      doc = REXML::Document.new
+      doc.add(tree)
+      doc.write(str='', 2)
+      #prettify keyword
+      str = str.gsub(/<keyword>\r\s*/, '<keyword> ')
+      str = str.gsub(/<keyword>\n\s*/, '<keyword> ')
+      str = str.gsub(/\n\s*<\/keyword>/, '</keyword>')
+      str = str.gsub(/\r\s*<\/keyword>/, '</keyword>')
+      #prettify identifier
+      str = str.gsub(/<identifier>\r\s*/, '<identifier> ')
+      str = str.gsub(/<identifier>\n\s*/, '<identifier> ')
+      str = str.gsub(/\n\s*<\/identifier>/, '</identifier>')
+      str = str.gsub(/\r\s*<\/identifier>/, '</identifier>')
+      #prettify symbol
+      str = str.gsub(/<symbol>\r\s*/, '<symbol> ')
+      str = str.gsub(/<symbol>\n\s*/, '<symbol> ')
+      str = str.gsub(/\n\s*<\/symbol>/, '</symbol>')
+      str = str.gsub(/\r\s*<\/symbol>/, '</symbol>')
+      #prettify integerConstant
+      str = str.gsub(/<integerConstant>\r\s*/, '<integerConstant> ')
+      str = str.gsub(/<integerConstant>\n\s*/, '<integerConstant> ')
+      str = str.gsub(/\n\s*<\/integerConstant>/, '</integerConstant>')
+      str = str.gsub(/\r\s*<\/integerConstant>/, '</integerConstant>')
+      #prettify stringConstant
+      str = str.gsub(/<stringConstant>\r\s*/, '<stringConstant> ')
+      str = str.gsub(/<stringConstant>\n\s*/, '<stringConstant> ')
+      str = str.gsub(/\n\s*<\/stringConstant>/, '</stringConstant>')
+      str = str.gsub(/\r\s*<\/stringConstant>/, '</stringConstant>')
+
+      #prettify parameterList
+      str = str.gsub('<parameterList/>', "<parameterList>\n</parameterList>")
+      puts str
       out_file = path + "\\" + file[0..-6] + '.xml'
       File.open(out_file, 'w') do |f|
-        f.puts(tree)
+        f.puts(str)
       end
       #puts tree
-      tree.write($stdout, 2)
+      #tree.write($stdout, 2)
     }
   end
 
@@ -269,6 +301,10 @@ class CompilationEngine
       end
     end
     base
+  end
+
+  def prettify
+
   end
 
 end
