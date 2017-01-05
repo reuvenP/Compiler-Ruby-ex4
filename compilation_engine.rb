@@ -49,13 +49,23 @@ class CompilationEngine
       str = str.gsub('<parameterList/>', "<parameterList>\n</parameterList>")
       #prettify expressionList
       str = str.gsub('<expressionList/>', "<expressionList>\n</expressionList>")
-      puts str
+      arr = str.split(/\n+/)
+      i = 0
+      while i < arr.length
+        if arr[i].include? '</parameterList>' and arr[i-1].include? '<parameterList>'
+          leading_spaces = arr[i-1].count(' ')
+          arr[i] = ' ' * leading_spaces + arr[i]
+        end
+        if arr[i].include? '</expressionList>' and arr[i-1].include? '<expressionList>'
+          leading_spaces = arr[i-1].count(' ')
+          arr[i] = ' ' * leading_spaces + arr[i]
+        end
+        i += 1
+      end
       out_file = path + "\\" + file[0..-6] + '.xml'
       File.open(out_file, 'w') do |f|
-        f.puts(str)
+        f.puts(arr)
       end
-      #puts tree
-      #tree.write($stdout, 2)
     }
   end
 
