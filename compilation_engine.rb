@@ -5,9 +5,10 @@ class CompilationEngine
 
   def initialize(path)
     JackTokenizer.new(path)
-    @tokens_array = []
     @all_files = Dir.entries(path).select{|f| f.end_with? 'T.xml'}
     @all_files.each {|file|
+      @tokens_array = []
+      @parse_tree = []
       tokens_stream = File.read(path + "\\" + file)
       doc = REXML::Document.new(tokens_stream)
       root = doc.root
@@ -15,7 +16,13 @@ class CompilationEngine
         elem = [token.name, token.text[1..-2]]
         @tokens_array.push(elem)
       }
-      compile_class
+      tree = compile_class
+      out_file = path + "\\" + file[0..-6] + '.xml'
+      File.open(out_file, 'w') do |f|
+        f.puts(tree)
+      end
+      puts tree
+      #tree.write($stdout, 1)
     }
   end
 
@@ -35,28 +42,97 @@ class CompilationEngine
     end
   end
 
-  def compile_class #Compiles a complete class.
+  def get_next_token_element
+    cur = get_next_token
+    elem = REXML::Element.new(cur[0])
+    elem.text = ' ' << cur[1] << ' '
+    elem
+  end
 
+  def compile_class #Compiles a complete class.
+    base = REXML::Element.new('class')
+    base.add_element(get_next_token_element) #'class'
+    base.add(get_next_token_element) #className
+    base.add(get_next_token_element) #'{'
+    while next_token[1] == 'static' or next_token[1] == 'field' #classVarDec*
+      base.add(compile_class_var_dec)
+    end
+    while next_token[1] == 'constructor' or next_token[1] == 'function' or next_token[1] == 'method' #subroutineDec*
+      base.add(compile_subroutine)
+    end
+    base.add(get_next_token_element) #'}'
+    base
   end
 
   def compile_class_var_dec #Compiles a static declaration or a field declaration.
-
+    base = REXML::Element.new('classVarDec')
+    base.add(get_next_token_element) #('static' | 'field')
+    base.add(get_next_token_element) #type
+    base.add(get_next_token_element) #varName
+    while next_token[1] == ',' #(',' varName)*
+      base.add(get_next_token_element) #','
+      base.add(get_next_token_element) #varName
+    end
+    base.add(get_next_token_element) #';'
+    base
   end
 
   def compile_subroutine #Compiles a complete method, function, or constructor.
-
+    base = REXML::Element.new('subroutineDec')
+    base.add(get_next_token_element) #('constructor' | 'function' | 'method')
+    base.add(get_next_token_element) #('void' | type)
+    base.add(get_next_token_element) #subroutineName
+    base.add(get_next_token_element) #'('
+    base.add(compile_parameter_list) #parameterList
+    base.add(get_next_token_element) #')'
+    base.add(compile_subroutine_body) #subroutineBody
+    base
   end
 
   def compile_parameter_list #Compiles a (possibly empty) parameter list, not including the enclosing “()”.
+    base = REXML::Element.new('parameterList')
+    if next_token[1] != ')' #param list not empty
+      base.add(get_next_token_element) #type
+      base.add(get_next_token_element) #varName
+      while next_token[1] == ','
+        base.add(get_next_token_element) #','
+        base.add(get_next_token_element) #type
+        base.add(get_next_token_element) #varName
+      end
+    end
+    base
+  end
 
+  def compile_subroutine_body
+    base = REXML::Element.new('subroutineBody')
+    base.add(get_next_token_element) #'{'
+    while next_token[1] == 'var' #varDec*
+      base.add(compile_var_dec)
+    end
+    base.add(compile_statements) #statements
+    base.add(get_next_token_element) #'}'
+    base
   end
 
   def compile_var_dec #Compiles a var declaration.
-
+    base = REXML::Element.new('varDec')
+    base.add(get_next_token_element) #'var'
+    base.add(get_next_token_element) #type
+    base.add(get_next_token_element) #varName
+    while next_token[1] == ','
+      base.add(get_next_token_element) #,
+      base.add(get_next_token_element) #varName
+    end
+    base.add(get_next_token_element) #';'
+    base
   end
 
   def compile_statements #Compiles a sequence of statements, not including the enclosing “{}”.
+    base = REXML::Element.new('statements')
+    while next_token[1] == 'let' or next_token[1] == 'if' or next_token[1] == 'while' or next_token[1] == 'do' or next_token[1] == 'return'
 
+    end
+    base
   end
 
   def compile_do #Compiles a do statement.
